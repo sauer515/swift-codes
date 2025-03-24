@@ -19,8 +19,7 @@ public class AppController {
 
     @GetMapping("/banks")
     public ResponseEntity<List<BankEntity>> getAllBanks() {
-        // return ResponseEntity.ok(csvParser.parseCsvFile(csvConfig.getFilePath()));
-        return ResponseEntity.ok(bankService.findAll()); // @todo after integrating database
+        return ResponseEntity.ok(bankService.findAll());
     }
 
     @GetMapping("{swiftCode}")
