@@ -25,10 +25,6 @@ public class CsvParser {
         try {
             File csvFile = new File(fileName);
 
-            if (!csvFile.exists()) {
-                throw new IllegalArgumentException("File .csv not found");
-            }
-
             MappingIterator<Map<String, String>> mi = csvMapper.readerFor(Map.class)
                                                                 .with(schema)
                                                                 .readValues(csvFile);

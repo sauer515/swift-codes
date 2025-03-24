@@ -24,12 +24,12 @@ public class BankService {
         bankEntityRepository.saveAll(banks);
     }
 
-    public void save(BankEntity bank) {
+    public BankEntity save(BankEntity bank) {
         bankEntityRepository.findBySwiftCode(bank.getSwiftCode()).ifPresent(entity ->
         {
             throw new BankAlreadyExistsException("Bank " + bank.getSwiftCode() + "already exists");
         });
-        bankEntityRepository.save(bank);
+        return bankEntityRepository.save(bank);
     }
 
     public void importFromCsv(String filePath) {
@@ -65,14 +65,15 @@ public class BankService {
         return bankEntityRepository.findByCountryISO2(countryISO2);
     }
 
-    public void saveBranch(Branch bank) {
+    public Branch saveBranch(Branch bank) {
         BankEntity headquarter = bankEntityRepository.findBySwiftCode(bank.getSwiftCode().substring(0, 8) + "XXX")
                 .orElseThrow(() -> new BankNotFoundException("Bank with " + bank.getSwiftCode() + " not found"));
         if (headquarter.getBranches().contains(bank)) {
-            throw new IllegalArgumentException("Branch already exists");
+            throw new BankAlreadyExistsException("Branch already exists");
         }
         headquarter.getBranches().add(bank);
         bankEntityRepository.save(headquarter);
+        return headquarter.getBranches().get(headquarter.getBranches().size() - 1);
     }
 
     public void deleteBySwiftCode(String swiftCode) {
