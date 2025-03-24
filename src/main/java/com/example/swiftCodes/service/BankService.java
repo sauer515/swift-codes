@@ -1,11 +1,11 @@
 package com.example.swiftCodes.service;
 
-import com.example.swiftCodes.csv.CsvConfig;
 import com.example.swiftCodes.csv.CsvParser;
+import com.example.swiftCodes.exception.BankAlreadyExistsException;
+import com.example.swiftCodes.exception.BankNotFoundException;
 import com.example.swiftCodes.model.BankEntity;
 import com.example.swiftCodes.model.Branch;
 import com.example.swiftCodes.repository.BankEntityRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,9 +25,10 @@ public class BankService {
     }
 
     public void save(BankEntity bank) {
-        if (bankEntityRepository.findBySwiftCode(bank.getSwiftCode()) != null) {
-            throw new IllegalArgumentException("Bank already exists");
-        }
+        bankEntityRepository.findBySwiftCode(bank.getSwiftCode()).ifPresent(entity ->
+        {
+            throw new BankAlreadyExistsException("Bank " + bank.getSwiftCode() + "already exists");
+        });
         bankEntityRepository.save(bank);
     }
 
@@ -40,16 +41,24 @@ public class BankService {
     }
 
     public BankEntity findBySwiftCode(String swiftCode) {
-        return bankEntityRepository.findBySwiftCode(swiftCode);
+        if (swiftCode == null) {
+            throw new IllegalArgumentException("Swift code was not present");
+        }
+        if (!swiftCode.endsWith("XXX")) {
+            findBranchBySwiftCode(swiftCode);
+        }
+        return bankEntityRepository.findBySwiftCode(swiftCode)
+                .orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
     }
 
     public Branch findBranchBySwiftCode(String swiftCode) {
-        return bankEntityRepository.findBySwiftCode(swiftCode.substring(0, 8) + "XXX")
+        BankEntity headquarter = bankEntityRepository.findBySwiftCode(swiftCode).orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
+        return headquarter
                 .getBranches()
                 .stream()
                 .filter(branch -> branch.getSwiftCode().equals(swiftCode))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new BankNotFoundException("Branch with " + swiftCode + " not found in " + headquarter.getBankName()));
     }
 
     public List<BankEntity> findByCountryISO2(String countryISO2) {
@@ -57,11 +66,9 @@ public class BankService {
     }
 
     public void saveBranch(Branch bank) {
-        BankEntity headquarter = bankEntityRepository.findBySwiftCode(bank.getSwiftCode().substring(0, 8) + "XXX");
-        if (headquarter == null) {
-            throw new IllegalArgumentException("Headquarter not found in database");
-        }
-        if (findBranchBySwiftCode(bank.getSwiftCode()) != null) {
+        BankEntity headquarter = bankEntityRepository.findBySwiftCode(bank.getSwiftCode().substring(0, 8) + "XXX")
+                .orElseThrow(() -> new BankNotFoundException("Bank with " + bank.getSwiftCode() + " not found"));
+        if (headquarter.getBranches().contains(bank)) {
             throw new IllegalArgumentException("Branch already exists");
         }
         headquarter.getBranches().add(bank);
@@ -70,18 +77,15 @@ public class BankService {
 
     public void deleteBySwiftCode(String swiftCode) {
         if (swiftCode.endsWith("XXX")) {
-            if (bankEntityRepository.findBySwiftCode(swiftCode) == null) {
-                throw new IllegalArgumentException("Bank not found");
-            }
+            bankEntityRepository.findBySwiftCode(swiftCode)
+                    .orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
             bankEntityRepository.deleteBySwiftCode(swiftCode);
             return;
         }
-        BankEntity headquarter = bankEntityRepository.findBySwiftCode(swiftCode.substring(0, 8) + "XXX");
-        if (headquarter == null) {
-            throw new IllegalArgumentException("Bank not found");
-        }
+        BankEntity headquarter = bankEntityRepository.findBySwiftCode(swiftCode.substring(0, 8) + "XXX")
+                .orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
         if (!headquarter.getBranches().removeIf(branch -> branch.getSwiftCode().equals(swiftCode))) {
-            throw new IllegalArgumentException("Branch not found");
+            throw new BankNotFoundException("Branch with " + swiftCode + " not found in " + headquarter.getBankName());
         }
         bankEntityRepository.save(headquarter);
     }
