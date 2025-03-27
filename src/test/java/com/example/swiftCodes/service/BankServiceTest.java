@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.matchers.Null;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -76,23 +75,23 @@ public class BankServiceTest {
     }
 
     @Test
-    public void saveBank() {
+    public void saveBankBank() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         when(bankEntityRepository.save(bank)).thenReturn(bank);
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.empty());
 
-        BankEntity result = bankService.save(bank);
+        BankEntity result = bankService.saveBank(bank);
 
         assertNotNull(result);
         assertEquals(bank, result);
     }
 
     @Test
-    public void shouldSaveBank() {
+    public void shouldSaveBankBank() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.of(bank));
 
-        assertThrows(BankAlreadyExistsException.class, () -> bankService.save(bank));
+        assertThrows(BankAlreadyExistsException.class, () -> bankService.saveBank(bank));
     }
 
     @Test
@@ -114,7 +113,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void saveBranchThrowsException() {
+    public void saveBankBranchThrowsException() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         Branch branch = new Branch("BRANCHTEST", "BANKTEST123", "TESTSTREET1", "PL", "Poland", false);
 

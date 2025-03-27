@@ -24,7 +24,7 @@ public class BankService {
         bankEntityRepository.saveAll(banks);
     }
 
-    public BankEntity save(BankEntity bank) {
+    public BankEntity saveBank(BankEntity bank) {
         bankEntityRepository.findBySwiftCode(bank.getSwiftCode()).ifPresent(entity ->
         {
             throw new BankAlreadyExistsException("Bank " + bank.getSwiftCode() + "already exists");
@@ -44,15 +44,12 @@ public class BankService {
         if (swiftCode == null) {
             throw new IllegalArgumentException("Swift code was not present");
         }
-        if (!swiftCode.endsWith("XXX")) {
-            findBranchBySwiftCode(swiftCode);
-        }
         return bankEntityRepository.findBySwiftCode(swiftCode)
                 .orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
     }
 
     public Branch findBranchBySwiftCode(String swiftCode) {
-        BankEntity headquarter = bankEntityRepository.findBySwiftCode(swiftCode).orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
+        BankEntity headquarter = bankEntityRepository.findBySwiftCode(swiftCode.substring(0,8)+"XXX").orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
         return headquarter
                 .getBranches()
                 .stream()

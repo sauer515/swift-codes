@@ -38,14 +38,11 @@ public class AppController {
         if (branch == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(bankService.findBranchBySwiftCode(swiftCode));
+        return ResponseEntity.ok(branch);
     }
 
     @GetMapping("/country/{countryISO2code}")
     public ResponseEntity<List<BankEntity>> getBanksByCountry(@PathVariable String countryISO2code) {
-        if (countryISO2code == null) {
-            return ResponseEntity.badRequest().build();
-        }
         return ResponseEntity.ok(bankService.findByCountryISO2(countryISO2code));
     }
 
@@ -55,7 +52,7 @@ public class AppController {
             return ResponseEntity.badRequest().build();
         }
         if (bank.getSwiftCode().endsWith("XXX")) {
-            bankService.save(bank);
+            bankService.saveBank(bank);
             return ResponseEntity.ok("Bank added successfully");
         }
         Branch branch = new Branch(bank.getBankName(), bank.getSwiftCode(), bank.getAddress(), bank.getCountryISO2(), bank.getCountryName(), bank.isHeadquarter());
@@ -65,9 +62,6 @@ public class AppController {
 
     @DeleteMapping("{swiftCode}")
     public ResponseEntity<String> deleteBank(@PathVariable String swiftCode) {
-        if (swiftCode == null) {
-            return ResponseEntity.badRequest().build();
-        }
         bankService.deleteBySwiftCode(swiftCode);
         return ResponseEntity.ok("Bank deleted successfully");
     }

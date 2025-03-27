@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(BankNotFoundException.class)
-    public ResponseEntity<String> bankNotFoundException(String message) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+    public ResponseEntity<String> bankNotFoundException(BankNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
     @ExceptionHandler(BankAlreadyExistsException.class)
-    public ResponseEntity<String> bankAlreadyExistsException(String message) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+    public ResponseEntity<String> bankAlreadyExistsException(BankAlreadyExistsException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }
