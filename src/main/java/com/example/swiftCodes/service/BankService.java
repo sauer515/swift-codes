@@ -27,7 +27,7 @@ public class BankService {
     public BankEntity saveBank(BankEntity bank) {
         bankEntityRepository.findBySwiftCode(bank.getSwiftCode()).ifPresent(entity ->
         {
-            throw new BankAlreadyExistsException("Bank " + bank.getSwiftCode() + "already exists");
+            throw new BankAlreadyExistsException("Bank " + bank.getSwiftCode() + " already exists");
         });
         return bankEntityRepository.save(bank);
     }
@@ -81,7 +81,7 @@ public class BankService {
             return;
         }
         BankEntity headquarter = bankEntityRepository.findBySwiftCode(swiftCode.substring(0, 8) + "XXX")
-                .orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode + " not found"));
+                .orElseThrow(() -> new BankNotFoundException("Bank with " + swiftCode.substring(0, 8) + "XXX" + " not found"));
         if (!headquarter.getBranches().removeIf(branch -> branch.getSwiftCode().equals(swiftCode))) {
             throw new BankNotFoundException("Branch with " + swiftCode + " not found in " + headquarter.getBankName());
         }

@@ -39,7 +39,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldReturnBankBySwiftCode() {
+    public void findBySwiftCode_shouldReturnBank() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.of(bank));
         BankEntity result = bankService.findBySwiftCode("BANKTESTXXX");
@@ -49,13 +49,13 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenBankNotFound() {
+    public void findBySwiftCode_shouldThrowExceptionWhenBankNotFound() {
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.empty());
         assertThrows(BankNotFoundException.class, () -> bankService.findBySwiftCode("BANKTESTXXX"));
     }
 
     @Test
-    public void shouldReturnBranchBySwiftCode() {
+    public void findBySwiftCode_shouldReturnBranch() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         bank.getBranches().add(new Branch("BRANCHTEST", "BANKTEST123", "TESTSTREET1", "PL", "Poland", false));
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.of(bank));
@@ -66,16 +66,14 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenBranchNotFound() {
+    public void findBySwiftCode_shouldThrowExceptionWhenBranchNotFound() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
-        bank.getBranches().add(new Branch("BRANCHTEST", "BANKTEST123", "TESTSTREET1", "PL", "Poland", false));
-        when(bankEntityRepository.findBySwiftCode("BANKTEST124")).thenReturn(Optional.empty());
 
         assertThrows(BankNotFoundException.class, () -> bankService.findBranchBySwiftCode("BANKTEST124"));
     }
 
     @Test
-    public void saveBankBank() {
+    public void saveBank_shouldSaveBank() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         when(bankEntityRepository.save(bank)).thenReturn(bank);
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.empty());
@@ -87,7 +85,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldSaveBankBank() {
+    public void saveBank_shouldThrowExceptionWhenBankExists() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.of(bank));
 
@@ -95,7 +93,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenBankAlreadyExists() {
+    public void saveBank_shouldSaveBranch() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         Branch newBranch = new Branch("BRANCHTEST", "BANKTEST123", "TESTSTREET1", "PL", "Poland", false);
 
@@ -113,7 +111,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void saveBankBranchThrowsException() {
+    public void saveBank_shouldThrowExceptionWhenBranchExists() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         Branch branch = new Branch("BRANCHTEST", "BANKTEST123", "TESTSTREET1", "PL", "Poland", false);
 
@@ -125,7 +123,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldDeleteBankBySwiftCode() {
+    public void deleteBank_shouldDeleteBankBySwiftCode() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.of(bank));
 
@@ -135,14 +133,14 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenBankToDeleteNotFound() {
+    public void deleteBank_shouldThrowExceptionWhenBankToDeleteNotFound() {
         when(bankEntityRepository.findBySwiftCode("BANKTESTXXX")).thenReturn(Optional.empty());
 
         assertThrows(BankNotFoundException.class, () -> bankService.deleteBySwiftCode("BANKTESTXXX"));
     }
 
     @Test
-    public void shouldDeleteBranchBySwiftCode() {
+    public void deleteBank_shouldDeleteBranchBySwiftCode() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         Branch branch = new Branch("BRANCHTEST", "BANKTEST123", "TESTSTREET1", "PL", "Poland", false);
         bank.getBranches().add(branch);
@@ -156,7 +154,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenBranchToDeleteNotFound() {
+    public void deleteBank_shouldThrowExceptionWhenBranchToDeleteNotFound() {
         BankEntity bank = new BankEntity("BANKTEST", "BANKTESTXXX", "TESTSTREET", "PL", "Poland", true);
         Branch branch = new Branch("BRANCHTEST", "BANKTEST123", "TESTSTREET1", "PL", "Poland", false);
         bank.getBranches().add(branch);
@@ -167,7 +165,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldParseCsv() {
+    public void importFromCsv_shouldParseCsv() {
         CsvParser csvParser = mock(CsvParser.class);
         bankService = new BankService(bankEntityRepository, csvParser);
 
@@ -186,7 +184,7 @@ public class BankServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenFilePathIsNull() {
+    public void importFromCsv_shouldThrowExceptionWhenFilePathIsNull() {
         String filePath = "nonexistent.csv";
         assertThrows(NullPointerException.class, () -> bankService.importFromCsv(filePath));
     }
